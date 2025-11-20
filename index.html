@@ -1,107 +1,82 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Treino da List</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Treino de Verbos - Combo + Áudio</title>
 <style>
-  /* layout responsivo e cores sem acento */
   :root{
-    --bg:#0f172a; --card:#111827; --accent:#38bdf8; --btn:#2563eb; --btn-hover:#1e40af;
+    --bg:#0f172a; --card:#111827; --accent:#38bdf8;
+    --btn:#2563eb; --btn-hover:#1e40af; --ok:#22c55e; --err:#ef4444;
   }
-  html,body{height:100%;margin:0;padding:0;overflow-x:hidden;}
-  body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    box-sizing:border-box;
-  }
-  .container{
-    width:100%;
-    max-width:460px;
-    background:var(--card);
-    border-radius:12px;
-    padding:28px;
-    box-sizing:border-box;
-    box-shadow:0 6px 20px rgba(2,6,23,0.6);
-    text-align:center;
-  }
-  h1{font-size:20px;margin:0 0 8px}
-  #verbDisplay{
-    font-size:28px;
-    font-weight:700;
-    color:var(--accent);
-    margin:18px 0;
-    min-height:36px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  input[type="text"]{
-    width:92%;
-    max-width:420px;
-    padding:12px 14px;
-    border-radius:10px;
-    border:none;
-    font-size:16px;
-    text-align:center;
-    outline:none;
-    box-sizing:border-box;
-    margin:0 auto;
-  }
+  html,body{height:100%;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#fff}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+  .container{width:100%;max-width:520px;background:var(--card);border-radius:12px;padding:22px;box-sizing:border-box;box-shadow:0 8px 30px rgba(2,6,23,0.6);text-align:center}
+  h1{margin:0 0 12px;font-size:20px}
+  #verbArea{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px}
+  #verbDisplay{font-weight:700;font-size:28px;color:var(--accent);min-width:150px}
+  .playBtn{background:transparent;border:2px solid var(--ok);color:var(--ok);width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center}
+  .playBtn:active{transform:scale(.98)}
+  select{width:100%;padding:12px;border-radius:10px;border:none;font-size:16px;background:#0b1220;color:#fff;text-align:center}
   .controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-  button{
-    flex:1;
-    min-width:120px;
-    padding:12px 14px;
-    border-radius:10px;
-    border:none;
-    background:var(--btn);
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
-  }
+  button{flex:1;min-width:120px;padding:12px;border-radius:10px;border:none;background:var(--btn);color:#fff;font-size:16px;cursor:pointer}
   button:hover{background:var(--btn-hover)}
-  #feedback{margin-top:14px;font-weight:700;min-height:26px}
-  #counters{margin-top:14px;color:#9ca3af;font-size:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-  .green{color:#22c55e}
-  .red{color:#ef4444}
-
-  @media(max-width:480px){
+  #feedback{margin-top:12px;font-weight:700;min-height:24px}
+  #counters{margin-top:14px;color:#9ca3af;font-size:14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .green{color:var(--ok)}
+  .red{color:var(--err)}
+  .small{font-size:13px;color:#9ca3af;margin-top:6px}
+  @media(max-width:520px){
     #verbDisplay{font-size:22px}
-    button{font-size:15px;padding:10px}
-    input[type="text"]{font-size:15px;padding:10px}
+    .playBtn{width:40px;height:40px}
   }
 </style>
 </head>
 <body>
-  <div class="container" role="main">
-    <h1>Treino de Verbos</h1>
+<div class="wrap">
+  <main class="container" role="main" aria-labelledby="title">
+    <h1 id="title">Treino de Verbos (select) + Pronúncia</h1>
 
-    <div id="verbDisplay">carregando...</div>
-
-    <input id="answerInput" type="text" placeholder="digite a traducao (sem acento)" autocomplete="off" />
-
-    <div class="controls">
-      <button id="validateBtn">validar</button>
-      <button id="nextBtn">proximo</button>
+    <div id="verbArea" aria-live="polite">
+      <div id="verbDisplay" aria-atomic="true">carregando...</div>
+      <button id="playAudio" class="playBtn" title="Ouvir pronúncia" aria-label="Ouvir pronúncia">🔊</button>
     </div>
 
-    <div id="feedback" aria-live="polite"></div>
+    <label for="answerSelect" class="sr-only" style="display:none">Escolha a tradução</label>
+    <select id="answerSelect" aria-label="Opções de tradução">
+      <option value="">Selecione a tradução</option>
+    </select>
+
+    <div class="controls">
+      <button id="validateBtn">Validar</button>
+      <button id="nextBtn">Próximo</button>
+    </div>
+
+    <div id="feedback" role="status" aria-live="polite"></div>
 
     <div id="counters">
       <div>Total: <span id="totalCount">0</span></div>
       <div>Restantes: <span id="remainingCount">0</span></div>
       <div>Corretos: <span id="scoreCorrect">0</span> | Errados: <span id="scoreWrong">0</span></div>
+      <div>% Acerto: <span id="percent">0%</span></div>
     </div>
-  </div>
+
+    <div class="small">Dica: clique em 🔊 para ouvir a pronúncia (usa a voz do navegador).</div>
+  </main>
+</div>
 
 <script>
-// ========== LISTA DE VERBOS (sem acento) ==========
+/*
+  Código completo:
+  - Banco com (base) de palavras (coloquei a lista do seu exemplo original)
+  - Select com 5 opções (1 correta + 4 erradas únicas)
+  - Botão de áudio usando speechSynthesis
+  - Cálculo de porcentagem baseado em respostas válidas
+  - Reembaralha e não repete até esgotar; quando esgotar, reinicia
+*/
+
+// === LISTA COMPLETA (copiar / ajustar conforme necessidade) ===
 const verbos = [
   { eng: "ABLE", pt: "CAPAZ" },
   { eng: "ABOUT", pt: "SOBRE" },
@@ -154,7 +129,7 @@ const verbos = [
   { eng: "ANYTHING", pt: "QUALQUER COISA" },
   { eng: "ANYWHERE", pt: "EM QUALQUER LUGAR" },
   { eng: "ANYONE", pt: "ALGUÉM" },
-  { eng: "APART", pt: "À PARTE" },
+  { eng: "APART", pt: "A PAR" },
   { eng: "APPEAR", pt: "APARECER" },
   { eng: "APPLY", pt: "APLICAR" },
   { eng: "FOR", pt: "DURANTE" },
@@ -188,7 +163,7 @@ const verbos = [
   { eng: "ON BEHALF OF", pt: "EM NOME DE" },
   { eng: "BEHAVIOR", pt: "COMPORTAMENTO" },
   { eng: "BEHIND", pt: "ATRÁS" },
-  { eng: "BELLIEVE", pt: "BARRIEVE" },
+  { eng: "BELIEVE", pt: "ACREDITAR" },  /* corrigi BELLIEVE para BELIEVE */
   { eng: "BELONG", pt: "PERTENCER" },
   { eng: "BELOW", pt: "ABAIXO" },
   { eng: "BESIDE", pt: "AO LADO DE" },
@@ -196,15 +171,16 @@ const verbos = [
   { eng: "BEST", pt: "MELHOR" }
 ];
 
-// ========== ESTADO ==========
+// === ESTADO GERAL ===
 let remaining = [...verbos];
 let current = null;
 let correctCount = 0;
 let wrongCount = 0;
 
-// ========== ELEMENTOS ==========
+// === ELEMENTOS DOM ===
 const verbDisplay = document.getElementById('verbDisplay');
-const answerInput = document.getElementById('answerInput');
+const playBtn = document.getElementById('playAudio');
+const answerSelect = document.getElementById('answerSelect');
 const validateBtn = document.getElementById('validateBtn');
 const nextBtn = document.getElementById('nextBtn');
 const feedbackEl = document.getElementById('feedback');
@@ -212,9 +188,11 @@ const totalCountEl = document.getElementById('totalCount');
 const remainingCountEl = document.getElementById('remainingCount');
 const scoreCorrectEl = document.getElementById('scoreCorrect');
 const scoreWrongEl = document.getElementById('scoreWrong');
+const percentEl = document.getElementById('percent');
 
-// remove acentos e compara texto
+// === FUNÇÕES AUXILIARES ===
 function cleanText(t){
+  // remove acento, transforma em minusculas e trim
   return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
@@ -223,74 +201,125 @@ function updateCounters(){
   remainingCountEl.textContent = remaining.length;
   scoreCorrectEl.textContent = correctCount;
   scoreWrongEl.textContent = wrongCount;
+  const total = correctCount + wrongCount;
+  percentEl.textContent = total === 0 ? '0%' : Math.round((correctCount/total)*100) + '%';
 }
 
-// sorteia sem repetir
-function pickRandom(){
-  if (remaining.length === 0){
-    remaining = [...verbos];
-    feedbackEl.textContent = 'Reiniciando a Lista - todos foram usados';
-    feedbackEl.className = '';
-    setTimeout(()=>{ feedbackEl.textContent = ''; pickRandom(); updateCounters(); }, 900);
-    return;
+function shuffleArray(arr){
+  // Fisher-Yates
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
   }
+  return a;
+}
 
-  const i = Math.floor(Math.random() * remaining.length);
-  current = remaining.splice(i,1)[0];
+// === MONTAR OPÇÕES (1 correta + 4 erradas aleatórias, sem repetir) ===
+function montarOpcoes(){
+  const opcoes = [current.pt];
+  const pool = verbos.map(v => v.pt).filter(p => p !== current.pt);
+  // embaralha pool
+  const embaralhado = shuffleArray(pool);
+  // pegar primeiras 4
+  for(let i=0;i<4 && i<embaralhado.length;i++){
+    if(!opcoes.includes(embaralhado[i])) opcoes.push(embaralhado[i]);
+  }
+  const final = shuffleArray(opcoes);
+  // popular select
+  answerSelect.innerHTML = '<option value=\"\">Selecione a tradução</option>';
+  final.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    el.textContent = opt;
+    answerSelect.appendChild(el);
+  });
+}
+
+// === ESCOLHER PRÓXIMO ===
+function pickRandom(){
+  if(remaining.length === 0){
+    // reinicia com aviso rápido
+    remaining = [...verbos];
+    feedbackEl.textContent = 'Lista reiniciada — todos os verbos foram usados.';
+    feedbackEl.className = '';
+    setTimeout(()=>feedbackEl.textContent = '', 1500);
+  }
+  const idx = Math.floor(Math.random()*remaining.length);
+  current = remaining.splice(idx,1)[0];
   verbDisplay.textContent = current.eng;
-  answerInput.value = '';
-  answerInput.focus();
-  updateCounters();
   feedbackEl.textContent = '';
   feedbackEl.className = '';
+  montarOpcoes();
+  updateCounters();
+  // reset select to placeholder
+  answerSelect.value = '';
 }
 
-// valida resposta
+// === VALIDAR RESPOSTA ===
 function validateAnswer(){
-  if (!current){
-    feedbackEl.textContent = 'esperando verbo...';
+  if(!current){
+    feedbackEl.textContent = 'Aguarde, carregando verbo...';
     return;
   }
-
-  const user = cleanText(answerInput.value);
-  const correct = cleanText(current.pt);
-
-  if (!user){
-    feedbackEl.textContent = 'digite sua resposta';
-    feedbackEl.className = '';
+  const selected = answerSelect.value;
+  if(!selected){
+    feedbackEl.textContent = 'Escolha uma opção antes de validar.';
     return;
   }
-
-  if (user === correct){
+  // comparar limpo (ignora acentos e caixa)
+  if(cleanText(selected) === cleanText(current.pt)){
     correctCount++;
-    feedbackEl.textContent = 'correto!';
+    feedbackEl.textContent = 'Correto!';
     feedbackEl.className = 'green';
   } else {
     wrongCount++;
-    feedbackEl.textContent = 'errado! correto: ' + current.pt;
+    feedbackEl.textContent = 'Errado — correto: ' + current.pt;
     feedbackEl.className = 'red';
   }
-
   updateCounters();
-
-  // *** AQUI FOI ALTERADO: agora espera 3 segundos ***
-  setTimeout(()=>{ pickRandom(); }, 3000);
+  // após 1.5s avança automaticamente
+  setTimeout(pickRandom, 1500);
 }
 
-// eventos
+// === ÁUDIO (pronúncia) ===
+function speak(text){
+  // Usa API Web Speech (speechSynthesis). O navegador escolhe voz disponível.
+  if(!('speechSynthesis' in window)){
+    alert('Este navegador não suporta síntese de voz.');
+    return;
+  }
+  // cancel previous to avoid sobreposição
+  window.speechSynthesis.cancel();
+
+  const u = new SpeechSynthesisUtterance(text);
+  // procurar voz em inglês preferencialmente (pt-BR não serve para pronúncia de palavra inglesa)
+  const voices = window.speechSynthesis.getVoices();
+  // tenta selecionar voz com en-US ou en-GB
+  let voice = voices.find(v => /en-?us/i.test(v.lang)) || voices.find(v => /en-?gb/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang));
+  if(voice) u.voice = voice;
+  u.lang = voice ? voice.lang : 'en-US';
+  u.rate = 0.95; // velocidade levemente reduzida para treino
+  window.speechSynthesis.speak(u);
+}
+
+// === EVENTOS ===
 validateBtn.addEventListener('click', validateAnswer);
 nextBtn.addEventListener('click', pickRandom);
-answerInput.addEventListener('keydown', function(e){
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    validateAnswer();
-  }
-});
+answerSelect.addEventListener('keydown', (e) => { if(e.key === 'Enter') validateAnswer(); });
+playBtn.addEventListener('click', () => { if(current) speak(current.eng); });
 
 // iniciar
 updateCounters();
 pickRandom();
+
+// Carregar vozes (alguns navegadores preenchem as vozes de forma assíncrona)
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = function(){
+    // não precisa fazer nada aqui, apenas assegura que voices estejam disponíveis
+  };
+}
 </script>
 </body>
 </html>
-
+```
