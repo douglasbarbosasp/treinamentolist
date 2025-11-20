@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Treino da List</title>
+<style>
+  /* layout responsivo e cores sem acento */
+  :root{
+    --bg:#0f172a; --card:#111827; --accent:#38bdf8; --btn:#2563eb; --btn-hover:#1e40af;
+  }
+  html,body{height:100%;margin:0;padding:0;overflow-x:hidden;}
+  body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    box-sizing:border-box;
+  }
+  .container{
+    width:100%;
+    max-width:460px;
+    background:var(--card);
+    border-radius:12px;
+    padding:28px;
+    box-sizing:border-box;
+    box-shadow:0 6px 20px rgba(2,6,23,0.6);
+    text-align:center;
+  }
+  h1{font-size:20px;margin:0 0 8px}
+  #verbDisplay{
+    font-size:28px;
+    font-weight:700;
+    color:var(--accent);
+    margin:18px 0;
+    min-height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  input[type="text"]{
+    width:92%;
+    max-width:420px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:none;
+    font-size:16px;
+    text-align:center;
+    outline:none;
+    box-sizing:border-box;
+    margin:0 auto;
+  }
+  .controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  button{
+    flex:1;
+    min-width:120px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:none;
+    background:var(--btn);
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+  }
+  button:hover{background:var(--btn-hover)}
+  #feedback{margin-top:14px;font-weight:700;min-height:26px}
+  #counters{margin-top:14px;color:#9ca3af;font-size:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .green{color:#22c55e}
+  .red{color:#ef4444}
+
+  @media(max-width:480px){
+    #verbDisplay{font-size:22px}
+    button{font-size:15px;padding:10px}
+    input[type="text"]{font-size:15px;padding:10px}
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>Treino de Verbos</h1>
+
+    <div id="verbDisplay">carregando...</div>
+
+    <input id="answerInput" type="text" placeholder="digite a traducao (sem acento)" autocomplete="off" />
+
+    <div class="controls">
+      <button id="validateBtn">validar</button>
+      <button id="nextBtn">proximo</button>
+    </div>
+
+    <div id="feedback" aria-live="polite"></div>
+
+    <div id="counters">
+      <div>Total: <span id="totalCount">0</span></div>
+      <div>Restantes: <span id="remainingCount">0</span></div>
+      <div>Corretos: <span id="scoreCorrect">0</span> | Errados: <span id="scoreWrong">0</span></div>
+    </div>
+  </div>
+
+<script>
+// ========== LISTA DE VERBOS (sem acento) ==========
+const verbos = [
+  { eng: "able", pt: "capaz" },
+  { eng: "about", pt: "sobre" },
+  { eng: "above", pt: "acima" },
+  { eng: "abroad", pt: "no exterior" },
+  { eng: "abstract", pt: "abstrair" },
+  { eng: "accept", pt: "aceitar" },
+  { eng: "accomplish", pt: "realizar" },
+  { eng: "according to", pt: "de acordo com" },
+  { eng: "account", pt: "conta" },
+  { eng: "accountable", pt: "responsavel" },
+  { eng: "accurate", pt: "preciso" },
+  { eng: "achieve", pt: "conseguir" },
+  { eng: "acquire", pt: "adquirir" },
+  { eng: "across", pt: "atraves" },
+  { eng: "act", pt: "agir" },
+  { eng: "actually", pt: "realmente" },
+  { eng: "add", pt: "adicionar" },
+  { eng: "address", pt: "endereco" },
+  { eng: "adjust", pt: "ajustar" },
+  { eng: "adopt", pt: "adotar" },
+  { eng: "advance", pt: "avanco" },
+  { eng: "advice", pt: "conselho" },
+  { eng: "advise", pt: "aconselhar" },
+  { eng: "affect", pt: "afetar" },
+  { eng: "afford", pt: "arcar com" },
+  { eng: "afraid", pt: "receoso" },
+  { eng: "after", pt: "depois" },
+  { eng: "again", pt: "outra vez" },
+  { eng: "against", pt: "contra" },
+  { eng: "age", pt: "idade" },
+  { eng: "agenda", pt: "agenda" },
+  { eng: "agree", pt: "concordar" },
+  { eng: "ahead", pt: "adiante" },
+  { eng: "aid", pt: "ajudar" },
+  { eng: "aim", pt: "mirar" },
+  { eng: "all", pt: "todo" },
+  { eng: "allow", pt: "permitir" },
+  { eng: "almost", pt: "quase" },
+  { eng: "alone", pt: "sozinho" },
+  { eng: "already", pt: "pronto" },
+  { eng: "also", pt: "tambem" },
+  { eng: "although", pt: "embora" },
+  { eng: "always", pt: "sempre" },
+  { eng: "among", pt: "entre" },
+  { eng: "analyze", pt: "analisar" },
+  { eng: "answer", pt: "responder" },
+  { eng: "any", pt: "qualquer" },
+  { eng: "anybody", pt: "qualquer pessoa" },
+  { eng: "anything", pt: "qualquer coisa" },
+  { eng: "anywhere", pt: "qualquer lugar" },
+  { eng: "anyone", pt: "qualquer um" },
+  { eng: "apart", pt: "a parte" },
+  { eng: "appear", pt: "aparecer" },
+  { eng: "apply", pt: "aplicar" }
+];
+
+// ========== ESTADO ==========
+let remaining = [...verbos];
+let current = null;
+let correctCount = 0;
+let wrongCount = 0;
+
+// ========== ELEMENTOS ==========
+const verbDisplay = document.getElementById('verbDisplay');
+const answerInput = document.getElementById('answerInput');
+const validateBtn = document.getElementById('validateBtn');
+const nextBtn = document.getElementById('nextBtn');
+const feedbackEl = document.getElementById('feedback');
+const totalCountEl = document.getElementById('totalCount');
+const remainingCountEl = document.getElementById('remainingCount');
+const scoreCorrectEl = document.getElementById('scoreCorrect');
+const scoreWrongEl = document.getElementById('scoreWrong');
+
+// remove acentos e compara texto
+function cleanText(t){
+  return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function updateCounters(){
+  totalCountEl.textContent = verbos.length;
+  remainingCountEl.textContent = remaining.length;
+  scoreCorrectEl.textContent = correctCount;
+  scoreWrongEl.textContent = wrongCount;
+}
+
+// sorteia sem repetir
+function pickRandom(){
+  if (remaining.length === 0){
+    remaining = [...verbos];
+    feedbackEl.textContent = 'Reiniciando a Lista - todos foram usados';
+    feedbackEl.className = '';
+    setTimeout(()=>{ feedbackEl.textContent = ''; pickRandom(); updateCounters(); }, 900);
+    return;
+  }
+
+  const i = Math.floor(Math.random() * remaining.length);
+  current = remaining.splice(i,1)[0];
+  verbDisplay.textContent = current.eng;
+  answerInput.value = '';
+  answerInput.focus();
+  updateCounters();
+  feedbackEl.textContent = '';
+  feedbackEl.className = '';
+}
+
+// valida resposta
+function validateAnswer(){
+  if (!current){
+    feedbackEl.textContent = 'esperando verbo...';
+    return;
+  }
+
+  const user = cleanText(answerInput.value);
+  const correct = cleanText(current.pt);
+
+  if (!user){
+    feedbackEl.textContent = 'digite sua resposta';
+    feedbackEl.className = '';
+    return;
+  }
+
+  if (user === correct){
+    correctCount++;
+    feedbackEl.textContent = 'correto!';
+    feedbackEl.className = 'green';
+  } else {
+    wrongCount++;
+    feedbackEl.textContent = 'errado! correto: ' + current.pt;
+    feedbackEl.className = 'red';
+  }
+
+  updateCounters();
+
+  // *** AQUI FOI ALTERADO: agora espera 3 segundos ***
+  setTimeout(()=>{ pickRandom(); }, 3000);
+}
+
+// eventos
+validateBtn.addEventListener('click', validateAnswer);
+nextBtn.addEventListener('click', pickRandom);
+answerInput.addEventListener('keydown', function(e){
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    validateAnswer();
+  }
+});
+
+// iniciar
+updateCounters();
+pickRandom();
+</script>
+</body>
+</html>
